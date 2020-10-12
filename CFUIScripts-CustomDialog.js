@@ -1,5 +1,5 @@
 /*name: Cf - UIScripts Custom Dialog
-description: Dialog Helper for custom UIScripts
+description: CF Dialog Helper for custom UIScripts
 author: corefracture
 version: 1.0
 includes:
@@ -7,7 +7,15 @@ excludes:
 
 js:*/
 
-var baseWin =
+/*
+See: https://github.com/Corefracture/cf_tr_uiscripts for further information. See LICENSE file before use!
+*/
+
+/**
+ * The string containing the base html for the dialog
+ * @type {string}
+ */
+const baseWin =
     '<div class="dialog ui-dialog-content ui-widget-content"'  +
     '           style="width: 90%; display: block; min-height: 80px; height: auto; padding: 10px">'  +
     '           <div id="cf-uiscripts-dialog-desc"/><br/>' +
@@ -18,16 +26,34 @@ var baseWin =
     '               <label for="cf-uiscripts-dialog-log">Operation Log:</label>' +
     '               <textarea id="cf-uiscripts-dialog-log" readonly' +
     '               style="height: 200px; background-color: #f1f1f1;"' +
-    '               class="form-control form-control-full textarea-with-grippie">Logs</textarea>'  +
+    '               class="form-control form-control-full textarea-with-grippie"></textarea>'  +
     '           </div>' +
     '       </div>  ';
 
 
+/**
+ * The available control types currently supported. More to come.
+ */
 const CFDiagConTypes = {
     TEXT: 1,
 }
 
+/**
+ *  A dynamic and custom TestRail dialog. Takes an controls definition object to build the controls. Example:
+ *  {controlName: {type:CFDiagConTypes.TEXT, lbl:"Controls label text:"}
+ *  controlName: Object name, not a string
+ *  type: The CFDiagConTypes control type.
+ *  lbl: The string to display as a label next to the control
+ */
 class CFUIScriptsDialog {
+
+    /**
+     * Constructs a custom UI dialog using defined controls and a callback to execute
+     * @param diagTitle - The string of the title
+     * @param diagDescription - The string description of what this dialog instance is for
+     * @param diagControls - Object: Example: {controlName: {type:CFDiagConTypes.TEXT, lbl:"Controls label text:"}
+     * @param exeCmdCallback - Callback to call when operation is executed.
+     */
     constructor(diagTitle, diagDescription, diagControls, exeCmdCallback) {
         this.diag = $(baseWin);
         this.log = this.diag.find("#cf-uiscripts-dialog-log")[0];
@@ -45,6 +71,10 @@ class CFUIScriptsDialog {
         $(this.diag).dialog({title: diagTitle, width: 800});
     }
 
+    /**
+     * Adds the controls provided in the constructor of this diag window instance
+     * @param diagControls
+     */
     addControls(diagControls) {
         for(const c in diagControls) {
             let newCon;
@@ -62,12 +92,30 @@ class CFUIScriptsDialog {
         }
     }
 
+    /**
+     * Re-enables the execute operation button
+     */
+    enableExeButton() {
+        let exeButton =this.diag.find("#cf-uiscripts-dialog-exec")[0];
+        exeButton.removeAttribute("disabled");
+        exeButton.innerText = "Execute Operation!";
+    }
+
+    /**
+     * Attempts to find and return the control use the provided ID
+     * @param controlId - The ID of the control to find
+     * @returns {*}
+     */
     getControl(controlId) {
         return this.controls[controlId];
     }
 
+    /**
+     * Simply prepends an entry into the operation log.
+     * TODO: cf: For future, switch to autoscrallong text box and append, not prepend
+     * @param entry - The log entry string to prepend
+     */
     addLogLine(entry) {
-        let existing = this.log.value;
-        this.log.value = entry + "\n" + existing ;
+        this.log.value = entry + "\n" + this.log.value;
     }
 }
